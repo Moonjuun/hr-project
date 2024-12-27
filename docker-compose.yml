@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  db:
+    build: ./db
+    container_name: mysql-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1111 # root 비밀번호 설정
+      MYSQL_DATABASE: hr_db # 기본 데이터베이스 생성
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+
+  backend:
+    build: ./hr-backend
+    container_name: backend-container
+    restart: always
+    ports:
+      - "4000:4000"
+    environment:
+      DB_HOST: "host.docker.internal" # MySQL 호스트를 로컬 컴퓨터로 변경
+      DB_USER: root # DB 사용자
+      DB_PASSWORD: 1111 # DB 비밀번호
+      DB_DATABASE: hr_db # 연결할 데이터베이스
+      DB_PORT: 3306 # MySQL 포트
+    depends_on:
+      - db
+
+  frontend:
+    build: ./hr-frontend
+    container_name: frontend-container
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+
+volumes:
+  db-data:
